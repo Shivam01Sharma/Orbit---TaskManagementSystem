@@ -8,8 +8,8 @@
     "server": "cd server && npm run dev",
     "client": "cd client && npm run dev",
     "build": "npm run build:client && npm run build:server",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm ci --legacy-peer-deps && npm run build",
+    "build:server": "cd server && npm ci --legacy-peer-deps && npm run build",
     "start": "node server/dist/index.js"
   },
   "keywords": [

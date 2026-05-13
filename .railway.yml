@@ -1,7 +1,8 @@
 build:
   builder: nixpacks
-  buildCommand: NODE_ENV=development npm install --legacy-peer-deps && npm run build
+  buildCommand: bash build.sh
 run:
-  startCommand: NODE_ENV=production npm run start
+  startCommand: npm run start
   env:
     NODE_ENV: production
+    PORT: $PORT
