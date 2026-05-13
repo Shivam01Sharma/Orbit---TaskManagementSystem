@@ -2,12 +2,14 @@
   "name": "orbit-task-management",
   "version": "1.0.0",
   "description": "Professional Task Management & Team Assignment Platform",
-  "main": "server/index.js",
+  "main": "server/dist/index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm run dev",
-    "build": "cd client && npm run build && cd ../server && npm run build",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
     "start": "node server/dist/index.js"
   },
   "keywords": [
