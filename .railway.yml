@@ -1,0 +1,7 @@
+build:
+  builder: nixpacks
+  buildCommand: npm ci && npm run build
+run:
+  startCommand: npm run start
+  env:
+    NODE_ENV: production
