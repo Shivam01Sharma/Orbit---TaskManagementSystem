@@ -9,6 +9,7 @@ import projectRoutes from './routes/projects';
 import taskRoutes from './routes/tasks';
 import teamRoutes from './routes/teams';
 import dashboardRoutes from './routes/dashboard';
+import { db } from './database';
 
 dotenv.config();
 
@@ -33,7 +34,15 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ status: 'ok', message: 'Orbit server is running' });
+  const usersCount = db.getAllUsers().length;
+  res.json({ 
+    status: 'ok', 
+    message: 'Orbit server is running',
+    database: {
+      ready: usersCount > 0,
+      usersLoaded: usersCount
+    }
+  });
 });
 
 // Root route
@@ -59,8 +68,10 @@ app.get('*', (req: Request, res: Response) => {
 
 // Start server
 app.listen(PORT, () => {
+  const usersCount = db.getAllUsers().length;
   console.log(`🚀 Orbit server running on http://localhost:${PORT}`);
   console.log(`📊 API Documentation: http://localhost:${PORT}`);
+  console.log(`✅ Database ready - ${usersCount} demo users loaded`);
 });
 
 export default app;

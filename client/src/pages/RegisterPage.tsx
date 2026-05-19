@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 
@@ -12,9 +12,40 @@ export const RegisterPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [generatedId, setGeneratedId] = useState('');
+  const [serverReady, setServerReady] = useState(false);
+  const [checkingServer, setCheckingServer] = useState(true);
 
   const { register } = useAuthStore();
   const navigate = useNavigate();
+
+  // Check server readiness on mount
+  useEffect(() => {
+    const checkServerReady = async () => {
+      try {
+        const response = await fetch('/api/health', { method: 'GET' });
+        if (response.ok) {
+          const data = await response.json();
+          // Server is ready if database has seed data
+          setServerReady(data.database?.ready === true && data.database?.usersLoaded > 0);
+        }
+      } catch (err) {
+        console.warn('Server not ready yet:', err);
+        setServerReady(false);
+      } finally {
+        setCheckingServer(false);
+      }
+    };
+
+    // Check immediately
+    checkServerReady();
+
+    // Poll every 2 seconds if not ready
+    const interval = setInterval(() => {
+      checkServerReady();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const roleDescriptions = {
     tasker: {
@@ -40,6 +71,11 @@ export const RegisterPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!serverReady) {
+      setError('Server is still initializing. Please wait a moment and try again.');
+      return;
+    }
 
     // Validation
     if (!name.trim()) {
@@ -264,10 +300,34 @@ export const RegisterPage: React.FC = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !serverReady}
                 className="w-full py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-6"
               >
-                {isLoading ? (
+                {!serverReady ? (
+                  <span className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Initializing server...
+                  </span>
+                ) : isLoading ? (
                   <span className="flex items-center justify-center">
                     <svg
                       className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"

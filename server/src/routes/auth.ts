@@ -94,6 +94,13 @@ router.post('/register', async (req: AuthenticatedRequest, res: Response) => {
   const { name, email, password, role } = req.body;
 
   try {
+    // Verify database is ready
+    const allUsers = db.getAllUsers();
+    if (!allUsers || allUsers.length === 0) {
+      console.error('Database not ready - no seed data found');
+      return res.status(503).json({ message: 'Server initializing, please try again in a moment' });
+    }
+
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: 'All fields are required' });
     }
@@ -114,8 +121,15 @@ router.post('/register', async (req: AuthenticatedRequest, res: Response) => {
     // Create user with auto-generated sequential ID
     const newUser = db.createUser(name, email, hashedPassword, role as 'tasker' | 'ql' | 'pl');
 
+    if (!newUser || !newUser.id) {
+      console.error('Failed to create user - invalid response');
+      return res.status(500).json({ message: 'Failed to create user account' });
+    }
+
     // Generate JWT token
     const token = generateToken(newUser.id, newUser.email, newUser.role);
+
+    console.log(`✅ User registered successfully: ${newUser.email} (${newUser.role})`);
 
     res.status(201).json({
       user: {
@@ -128,8 +142,8 @@ router.post('/register', async (req: AuthenticatedRequest, res: Response) => {
       token,
     });
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ message: 'Registration failed' });
+    console.error('Registration error:', error instanceof Error ? error.message : String(error));
+    res.status(500).json({ message: 'Registration failed - please try again' });
   }
 });
 
