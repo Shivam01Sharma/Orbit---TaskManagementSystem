@@ -12,6 +12,7 @@ export const LoginPage: React.FC = () => {
 
   const { login } = useAuthStore();
   const navigate = useNavigate();
+  // v3 - ensure fresh build
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
