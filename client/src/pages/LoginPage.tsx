@@ -4,6 +4,7 @@ import LoadingSplash from '../components/LoadingSplash';
 import { useAuthStore } from '../store/authStore';
 
 export const LoginPage: React.FC = () => {
+  // Force rebuild - version 2
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
