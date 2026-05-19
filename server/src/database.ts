@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import bcryptjs from 'bcryptjs';
-import { MongoClient, Db as MongoDb } from 'mongodb';
 
 export interface User {
   id: string;
@@ -49,11 +48,8 @@ export interface Team {
   createdAt: string;
 }
 
-// Mongo-backed Database with in-memory cache for sync-like API
+// In-memory database with seed data
 export class MongoDatabase {
-  private client: MongoClient | null = null;
-  private db: MongoDb | null = null;
-
   private users: Map<string, User> = new Map();
   private projects: Map<string, Project> = new Map();
   private tasks: Map<string, Task> = new Map();
@@ -62,59 +58,12 @@ export class MongoDatabase {
   private userIdCounters = { tasker: 0, ql: 0, pl: 0 };
 
   constructor() {
-    this.initialize();
+    // Seed data immediately in-memory
+    this.seedInitialData();
+    console.log('✅ In-memory database initialized with seed data');
   }
 
-  private async initialize() {
-    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/orbit';
-    this.client = new MongoClient(uri);
-    try {
-      await this.client.connect();
-      this.db = this.client.db();
-
-      // Ensure seed data exists
-      const usersCount = await this.db.collection('users').countDocuments();
-      if (usersCount === 0) {
-        await this.seedInitialData();
-      }
-
-      await this.loadCaches();
-      console.log('✅ MongoDB connected and cache initialized');
-    } catch (err) {
-      console.error('MongoDB connection error:', err);
-    }
-  }
-
-  private async loadCaches() {
-    if (!this.db) return;
-    const users = await this.db.collection('users').find().toArray();
-    users.forEach((u: any) => this.users.set(u.id, u as User));
-
-    const projects = await this.db.collection('projects').find().toArray();
-    projects.forEach((p: any) => this.projects.set(p.id, p as Project));
-
-    const tasks = await this.db.collection('tasks').find().toArray();
-    tasks.forEach((t: any) => this.tasks.set(t.id, t as Task));
-
-    const teams = await this.db.collection('teams').find().toArray();
-    teams.forEach((tm: any) => this.teams.set(tm.id, tm as Team));
-
-    // set counters based on loaded users
-    for (const u of this.users.values()) {
-      if (u.role === 'tasker') this.userIdCounters.tasker = Math.max(this.userIdCounters.tasker, this.parseNumericId(u.id));
-      if (u.role === 'ql') this.userIdCounters.ql = Math.max(this.userIdCounters.ql, this.parseNumericId(u.id));
-      if (u.role === 'pl') this.userIdCounters.pl = Math.max(this.userIdCounters.pl, this.parseNumericId(u.id));
-    }
-  }
-
-  private parseNumericId(id: string) {
-    const parts = id.split('-');
-    const num = parseInt(parts[1] || '0', 10);
-    return isNaN(num) ? 0 : num;
-  }
-
-  private async seedInitialData() {
-    if (!this.db) return;
+  private seedInitialData() {
     const hashedPassword = bcryptjs.hashSync('Password@123456', 10);
 
     const userConfigs = [
@@ -161,7 +110,7 @@ export class MongoDatabase {
       };
     });
 
-    await this.db.collection('users').insertMany(users);
+    users.forEach((user) => this.users.set(user.id, user));
 
     const projects: Project[] = [
       {
@@ -186,7 +135,7 @@ export class MongoDatabase {
       },
     ];
 
-    await this.db.collection('projects').insertMany(projects);
+    projects.forEach((project) => this.projects.set(project.id, project));
 
     const tasks: Task[] = [
       {
@@ -247,7 +196,7 @@ export class MongoDatabase {
       },
     ];
 
-    await this.db.collection('tasks').insertMany(tasks);
+    tasks.forEach((task) => this.tasks.set(task.id, task));
 
     const teams: Team[] = [
       {
@@ -268,7 +217,7 @@ export class MongoDatabase {
       },
     ];
 
-    await this.db.collection('teams').insertMany(teams);
+    teams.forEach((team) => this.teams.set(team.id, team));
   }
 
   // Generate sequential user IDs
@@ -283,15 +232,7 @@ export class MongoDatabase {
     }
   }
 
-  private async hashPassword(password: string): Promise<string> {
-    return bcryptjs.hash(password, 10);
-  }
-
-  private async comparePassword(password: string, hash: string): Promise<boolean> {
-    return bcryptjs.compare(password, hash);
-  }
-
-  // User methods (synchronous API backed by in-memory cache)
+  // User methods
   findUserByEmail(email: string): User | undefined {
     for (const user of this.users.values()) {
       if (user.email === email) return user;
@@ -322,7 +263,6 @@ export class MongoDatabase {
 
   createProject(project: Project): Project {
     this.projects.set(project.id, project);
-    this.db?.collection('projects').insertOne(project).catch(console.error);
     return project;
   }
 
@@ -331,7 +271,6 @@ export class MongoDatabase {
     if (project) {
       const updated = { ...project, ...updates };
       this.projects.set(id, updated);
-      this.db?.collection('projects').updateOne({ id }, { $set: updates }).catch(console.error);
       return updated;
     }
     return undefined;
@@ -356,7 +295,6 @@ export class MongoDatabase {
 
   createTask(task: Task): Task {
     this.tasks.set(task.id, task);
-    this.db?.collection('tasks').insertOne(task).catch(console.error);
     return task;
   }
 
@@ -365,7 +303,6 @@ export class MongoDatabase {
     if (task) {
       const updated = { ...task, ...updates };
       this.tasks.set(id, updated);
-      this.db?.collection('tasks').updateOne({ id }, { $set: updates }).catch(console.error);
       return updated;
     }
     return undefined;
@@ -386,7 +323,6 @@ export class MongoDatabase {
 
   createTeam(team: Team): Team {
     this.teams.set(team.id, team);
-    this.db?.collection('teams').insertOne(team).catch(console.error);
     return team;
   }
 
@@ -395,7 +331,6 @@ export class MongoDatabase {
     if (team) {
       const updated = { ...team, ...updates };
       this.teams.set(id, updated);
-      this.db?.collection('teams').updateOne({ id }, { $set: updates }).catch(console.error);
       return updated;
     }
     return undefined;
@@ -490,7 +425,6 @@ export class MongoDatabase {
       joinDate: new Date().toISOString().split('T')[0],
     };
     this.users.set(userId, newUser);
-    this.db?.collection('users').insertOne(newUser).catch(console.error);
     return newUser;
   }
 }
