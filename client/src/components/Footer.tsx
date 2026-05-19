@@ -85,7 +85,7 @@ export const Footer: React.FC = () => {
 
         <div className="border-t border-gray-800 pt-8">
           <p className="text-sm text-center text-gray-400">
-            © {currentYear} Orbit. All rights reserved. | Made with ❤️ for teams
+            © {currentYear} Orbit. All rights reserved.
           </p>
         </div>
       </div>

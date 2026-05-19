@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { apiService } from '../services/api';
 import { StatCard } from '../components/StatCard';
-import { Navbar } from '../components/Navbar';
 import { AssignResourcesModal } from '../components/AssignResourcesModal';
+import { TaskAssignmentModal } from '../components/TaskAssignmentModal';
 // import { Navigation } from '../components/Navigation';
 
 interface Project {
@@ -36,6 +37,7 @@ interface Tasker {
 
 export const PLDashboard: React.FC = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     activeProjects: 0,
     taskerCount: 0,
@@ -48,6 +50,7 @@ export const PLDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isTaskAssignmentOpen, setIsTaskAssignmentOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'taskers' | 'qls' | 'orgchart'>('overview');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [newProject, setNewProject] = useState({
@@ -67,7 +70,9 @@ export const PLDashboard: React.FC = () => {
       
       // Fetch projects
       const projectsResponse = await apiService.getProjects();
-      const projectsData = Array.isArray(projectsResponse) ? projectsResponse : (projectsResponse?.data || []);
+      const projectsData = (Array.isArray(projectsResponse) ? projectsResponse : (projectsResponse?.data || [])).filter(
+        (proj: any) => proj.status === 'active'
+      );
       const enrichedProjects = projectsData.map((proj: any) => ({
         ...proj,
         taskersCount: Math.floor(Math.random() * 50) + 10,
@@ -175,18 +180,26 @@ export const PLDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full min-h-screen bg-slate-50">
+      <div className="w-full">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Project Leader Dashboard 🎯
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Manage projects, allocate teams, and oversee organizational metrics
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-900">
+              Project Leader Dashboard
+            </h1>
+            <p className="text-slate-600 mt-2 text-lg">
+              Manage projects, allocate teams, and oversee organizational metrics
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/create-task')}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm flex items-center gap-2"
+            >
+              Create Task
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -336,9 +349,18 @@ export const PLDashboard: React.FC = () => {
 
                       <button
                         onClick={() => handleOpenAssignModal(project.id)}
-                        className="w-full py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium text-sm"
+                        className="w-full py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium text-sm mb-2"
                       >
                         + Assign QL & Taskers
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedProjectId(project.id);
+                          setIsTaskAssignmentOpen(true);
+                        }}
+                        className="w-full py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition font-medium text-sm"
+                      >
+                        + Assign Tasks
                       </button>
                     </div>
                   ))}
@@ -651,6 +673,16 @@ export const PLDashboard: React.FC = () => {
         projectId={selectedProjectId}
         onClose={() => setIsAssignModalOpen(false)}
         onAssign={handleAssignSuccess}
+      />
+
+      <TaskAssignmentModal
+        isOpen={isTaskAssignmentOpen}
+        projectId={selectedProjectId}
+        onClose={() => setIsTaskAssignmentOpen(false)}
+        onAssign={() => {
+          fetchData();
+          setIsTaskAssignmentOpen(false);
+        }}
       />
     </div>
   );

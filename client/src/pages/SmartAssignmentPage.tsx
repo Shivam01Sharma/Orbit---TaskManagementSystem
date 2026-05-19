@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Navbar } from '../components/Navbar';
+import React, { useState, useMemo } from 'react';
+// Page rendered inside DashboardLayout
 
 interface Recommendation {
   id: string;
@@ -123,36 +123,54 @@ export const SmartAssignmentPage: React.FC = () => {
     );
   };
 
+  const [search, setSearch] = useState('');
+
+  const filteredRecommendations = useMemo(() => {
+    if (!search) return recommendations;
+    const q = search.toLowerCase();
+    return recommendations.filter(
+      (r) => r.name.toLowerCase().includes(q) || r.specialization.toLowerCase().includes(q)
+    );
+  }, [search]);
+
+  const loadAll = () => {
+    setSelectedTaskers(recommendations.map((r) => r.id));
+  };
+
+  const matchBadgeClass = (score: number) => {
+    if (score >= 95) return 'bg-green-100 text-green-800';
+    if (score >= 85) return 'bg-amber-100 text-amber-800';
+    return 'bg-red-100 text-red-800';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-      <Navbar />
+    <div className="w-full">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-5xl font-bold text-white mb-2">AI Smart Task Assignment</h1>
-          <p className="text-purple-200 text-lg">Intelligent task matching based on performance history</p>
+        <div className="mb-6">
+          <h1 className="text-4xl font-bold text-slate-900 mb-1">AI Smart Task Assignment</h1>
+          <p className="text-slate-700 leading-6">Intelligent task matching based on performance history</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Task Batch Selector */}
           <div className="lg:col-span-1">
-            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 sticky top-8">
-              <h2 className="text-white font-bold text-lg mb-4">📦 Task Batches</h2>
+            <div className="bg-white rounded-xl p-4 border border-gray-100 sticky top-8 shadow-sm">
+              <h2 className="text-slate-900 font-bold text-lg mb-4">Task Batches</h2>
               <div className="space-y-3">
                 {batches.map((batch) => (
                   <div
                     key={batch.id}
                     onClick={() => setSelectedBatch(batch)}
-                    className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
+                    className={`p-3 rounded-lg cursor-pointer transition-all duration-300 ${
                       selectedBatch?.id === batch.id
-                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 ring-2 ring-white'
-                        : 'bg-white bg-opacity-10 hover:bg-opacity-20'
+                        ? 'bg-slate-100 ring-2 ring-slate-200'
+                        : 'bg-white hover:bg-gray-50'
                     }`}
                   >
-                    <p className="text-white font-semibold text-sm truncate">{batch.title}</p>
-                    <p className="text-purple-200 text-xs mt-1">{batch.taskCount} tasks</p>
+                    <p className="text-slate-900 font-semibold text-sm truncate">{batch.title}</p>
+                    <p className="text-slate-600 text-sm mt-1">{batch.taskCount} tasks</p>
                     <div className="flex gap-2 mt-2">
-                      <span className="text-xs bg-white bg-opacity-20 text-purple-100 px-2 py-1 rounded">
+                      <span className="text-xs bg-gray-100 text-slate-700 px-2 py-1 rounded">
                         {batch.type}
                       </span>
                     </div>
@@ -165,53 +183,59 @@ export const SmartAssignmentPage: React.FC = () => {
           {/* Recommendations Panel */}
           <div className="lg:col-span-2">
             {selectedBatch ? (
-              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-8 border border-white border-opacity-20">
+              <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                 {/* Batch Info */}
-                <div className="mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-4">{selectedBatch.title}</h3>
-                  <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">{selectedBatch.title}</h3>
+                  <div className="grid grid-cols-4 gap-4 mb-4">
                     <div>
-                      <p className="text-purple-200 text-sm">Type</p>
-                      <p className="text-white font-semibold">{selectedBatch.type}</p>
+                      <p className="text-slate-500 text-sm">Type</p>
+                      <p className="text-slate-900 font-semibold">{selectedBatch.type}</p>
                     </div>
                     <div>
-                      <p className="text-purple-200 text-sm">Tasks</p>
-                      <p className="text-white font-semibold">{selectedBatch.taskCount}</p>
+                      <p className="text-slate-500 text-sm">Tasks</p>
+                      <p className="text-slate-900 font-semibold">{selectedBatch.taskCount}</p>
                     </div>
                     <div>
-                      <p className="text-purple-200 text-sm">Est. Time</p>
-                      <p className="text-white font-semibold">{selectedBatch.estimatedTime}</p>
+                      <p className="text-slate-500 text-sm">Est. Time</p>
+                      <p className="text-slate-900 font-semibold">{selectedBatch.estimatedTime}</p>
                     </div>
                     <div>
-                      <p className="text-purple-200 text-sm">Deadline</p>
-                      <p className="text-white font-semibold">{selectedBatch.deadline}</p>
+                      <p className="text-slate-500 text-sm">Deadline</p>
+                      <p className="text-slate-900 font-semibold">{selectedBatch.deadline}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* AI Recommendations */}
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <h4 className="text-white font-bold text-lg">🤖 AI Recommended Team</h4>
-                    <div className="flex gap-2">
-                      <button className="text-xs bg-white bg-opacity-10 text-purple-200 px-3 py-1 rounded hover:bg-opacity-20 transition">
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-slate-900 font-bold text-lg">AI Recommended Team</h4>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search name or skill"
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm w-56"
+                      />
+                      <button className="text-xs bg-gray-100 text-slate-700 px-3 py-1 rounded hover:bg-gray-200 transition">
                         Filter
                       </button>
-                      <button className="text-xs bg-gradient-to-r from-green-600 to-emerald-600 text-white px-3 py-1 rounded hover:from-green-700 hover:to-emerald-700 transition">
-                        Load All
+                      <button onClick={loadAll} className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                        Select All
                       </button>
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    {recommendations.map((rec) => (
+                    {filteredRecommendations.map((rec) => (
                       <div
                         key={rec.id}
                         onClick={() => toggleTasker(rec.id)}
-                        className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
+                        className={`p-3 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-sm ${
                           selectedTaskers.includes(rec.id)
-                            ? 'bg-gradient-to-r from-purple-600 to-blue-600 border-2 border-white'
-                            : 'bg-white bg-opacity-10 border-2 border-transparent hover:bg-opacity-20'
+                            ? 'bg-slate-50 border-2 border-slate-200'
+                            : 'bg-white border border-gray-100'
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -219,43 +243,43 @@ export const SmartAssignmentPage: React.FC = () => {
                             type="checkbox"
                             checked={selectedTaskers.includes(rec.id)}
                             onChange={() => toggleTasker(rec.id)}
-                            className="mt-1 w-5 h-5 cursor-pointer accent-purple-600"
+                            className="mt-1 w-5 h-5 cursor-pointer accent-green-600"
                           />
 
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-2xl">{rec.avatar}</span>
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center font-semibold">{rec.name[0]}</div>
                                 <div>
-                                  <p className="text-white font-semibold">{rec.name}</p>
-                                  <p className="text-purple-300 text-xs">{rec.level}</p>
+                                  <p className="text-slate-900 font-semibold">{rec.name}</p>
+                                  <p className="text-slate-500 text-xs">{rec.level} • {rec.specialization}</p>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1 rounded-full font-bold text-sm">
+                                <div className={`px-3 py-1 rounded-full font-semibold text-sm ${matchBadgeClass(rec.matchScore)}`}>
                                   {rec.matchScore}% Match
                                 </div>
                               </div>
                             </div>
 
-                            <p className="text-purple-200 text-xs mb-2">{rec.reason}</p>
+                            <p className="text-slate-600 text-sm mb-2">{rec.reason}</p>
 
                             <div className="grid grid-cols-4 gap-2 text-xs">
                               <div>
-                                <p className="text-purple-300">Accuracy</p>
-                                <p className="text-white font-bold">{rec.pastAccuracy}%</p>
+                                <p className="text-slate-500">Accuracy</p>
+                                <p className="text-slate-900 font-bold">{rec.pastAccuracy}%</p>
                               </div>
                               <div>
-                                <p className="text-purple-300">Speed</p>
-                                <p className="text-white font-bold">{rec.speedRating}%</p>
+                                <p className="text-slate-500">Speed</p>
+                                <p className="text-slate-900 font-bold">{rec.speedRating}%</p>
                               </div>
                               <div>
-                                <p className="text-purple-300">Recent Tasks</p>
-                                <p className="text-white font-bold">{rec.recentTasks}</p>
+                                <p className="text-slate-500">Recent Tasks</p>
+                                <p className="text-slate-900 font-bold">{rec.recentTasks}</p>
                               </div>
                               <div>
-                                <p className="text-purple-300">Specialty</p>
-                                <p className="text-white font-bold text-right">{rec.specialization}</p>
+                                <p className="text-slate-500">Specialty</p>
+                                <p className="text-slate-900 font-bold text-right">{rec.specialization}</p>
                               </div>
                             </div>
                           </div>
@@ -266,13 +290,13 @@ export const SmartAssignmentPage: React.FC = () => {
                 </div>
 
                 {/* Assignment Summary */}
-                <div className="border-t border-white border-opacity-10 pt-6">
-                  <div className="bg-white bg-opacity-5 p-4 rounded-lg mb-4">
-                    <p className="text-purple-200 text-sm mb-2">
-                      ✓ Selected: {selectedTaskers.length} taskers
+                <div className="border-t border-gray-100 pt-4">
+                  <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                    <p className="text-slate-700 text-sm mb-1">
+                      Selected: {selectedTaskers.length} taskers
                     </p>
                     {selectedTaskers.length > 0 && (
-                      <p className="text-green-400 text-xs">
+                      <p className="text-slate-600 text-xs">
                         Team capacity: {selectedTaskers.length * 100} tasks/week
                       </p>
                     )}
@@ -280,7 +304,7 @@ export const SmartAssignmentPage: React.FC = () => {
 
                   <button
                     disabled={selectedTaskers.length === 0}
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {selectedTaskers.length === 0
                       ? 'Select taskers to assign'
@@ -289,32 +313,32 @@ export const SmartAssignmentPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-12 border border-white border-opacity-20 text-center">
-                <p className="text-purple-200 text-lg">Select a task batch to view AI recommendations</p>
+              <div className="bg-white rounded-xl p-8 border border-gray-100 text-center">
+                <p className="text-slate-500 text-lg">Select a task batch to view AI recommendations</p>
               </div>
             )}
           </div>
         </div>
 
         {/* AI Explanation */}
-        <div className="mt-12 bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20">
-          <h4 className="text-white font-bold text-lg mb-4">🧠 How AI Matching Works</h4>
+        <div className="mt-8 bg-white rounded-xl p-4 border border-gray-100">
+          <h4 className="text-slate-900 font-bold text-lg mb-3">How AI Matching Works</h4>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-            <div className="p-3 bg-white bg-opacity-5 rounded-lg">
-              <p className="text-yellow-400 font-bold">📊 Performance History</p>
-              <p className="text-purple-200 text-xs mt-1">Analyzes past accuracy, speed, and consistency scores</p>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-yellow-600 font-bold">Performance History</p>
+              <p className="text-slate-500 text-xs mt-1">Analyzes past accuracy, speed, and consistency scores</p>
             </div>
-            <div className="p-3 bg-white bg-opacity-5 rounded-lg">
-              <p className="text-blue-400 font-bold">🎯 Task Specialization</p>
-              <p className="text-purple-200 text-xs mt-1">Matches tasker specialties with task type requirements</p>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-slate-700 font-bold">Task Specialization</p>
+              <p className="text-slate-500 text-xs mt-1">Matches tasker specialties with task type requirements</p>
             </div>
-            <div className="p-3 bg-white bg-opacity-5 rounded-lg">
-              <p className="text-green-400 font-bold">⏱️ Capacity Planning</p>
-              <p className="text-purple-200 text-xs mt-1">Considers current workload and deadline constraints</p>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-green-600 font-bold">Capacity Planning</p>
+              <p className="text-slate-500 text-xs mt-1">Considers current workload and deadline constraints</p>
             </div>
-            <div className="p-3 bg-white bg-opacity-5 rounded-lg">
-              <p className="text-purple-400 font-bold">🚀 Growth Potential</p>
-              <p className="text-purple-200 text-xs mt-1">Includes learning opportunities for junior taskers</p>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <p className="text-slate-700 font-bold">Growth Potential</p>
+              <p className="text-slate-500 text-xs mt-1">Includes learning opportunities for junior taskers</p>
             </div>
           </div>
         </div>

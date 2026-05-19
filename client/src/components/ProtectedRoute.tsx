@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
+import LoadingSplash from './LoadingSplash';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,7 +27,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }, [isAuthenticated, user, allowedRoles, navigate]);
 
   if (!isAuthenticated) {
-    return <div>Loading...</div>;
+    return <LoadingSplash message="Launching" />;
   }
 
   return <>{children}</>;

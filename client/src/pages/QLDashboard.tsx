@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { StatCard } from '../components/StatCard';
-import { Navbar } from '../components/Navbar';
+import { TaskAssignmentModal } from '../components/TaskAssignmentModal';
 
 interface ProjectDetail {
   id: string;
@@ -26,6 +27,7 @@ interface TeamDetail {
 
 export const QLDashboard: React.FC = () => {
   // const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalTasks: 0,
     completedTasks: 0,
@@ -39,6 +41,8 @@ export const QLDashboard: React.FC = () => {
   const [teams, setTeams] = useState<TeamDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'projects' | 'teams'>('projects');
+  const [isTaskAssignmentOpen, setIsTaskAssignmentOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
   useEffect(() => {
     fetchData();
@@ -78,18 +82,26 @@ export const QLDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full min-h-screen bg-slate-50">
+      <div className="w-full">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Quality Leader Dashboard 👥
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Manage your teams, assign tasks, and track progress
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-900">
+              Quality Leader Dashboard
+            </h1>
+            <p className="text-slate-600 mt-2 text-lg">
+              Manage your teams, assign tasks, and track progress
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/create-task')}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm flex items-center gap-2"
+            >
+              Create Task
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -276,6 +288,18 @@ export const QLDashboard: React.FC = () => {
                       </div>
                     </div>
                   )}
+
+                  <div className="mt-4 pt-4 border-t">
+                    <button
+                      onClick={() => {
+                        setSelectedProjectId(project.id);
+                        setIsTaskAssignmentOpen(true);
+                      }}
+                      className="w-full py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition font-medium text-sm"
+                    >
+                      + Assign Tasks to Team
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -365,6 +389,16 @@ export const QLDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      <TaskAssignmentModal
+        isOpen={isTaskAssignmentOpen}
+        projectId={selectedProjectId}
+        onClose={() => setIsTaskAssignmentOpen(false)}
+        onAssign={() => {
+          fetchData();
+          setIsTaskAssignmentOpen(false);
+        }}
+      />
     </div>
   );
 };

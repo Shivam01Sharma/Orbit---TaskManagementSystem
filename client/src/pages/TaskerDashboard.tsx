@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { apiService } from '../services/api';
 import { StatCard } from '../components/StatCard';
-import { Navbar } from '../components/Navbar';
 
 interface Task {
   id: string;
@@ -78,6 +77,7 @@ export const TaskerDashboard: React.FC = () => {
 
   const handlePerformTask = (task: Task) => {
     setSelectedTask(task);
+    setIsPerformingTask(true);
     setTaskProgress(task.completionPercentage);
     setIsPerformingTask(true);
     setWorkDone('');
@@ -89,28 +89,48 @@ export const TaskerDashboard: React.FC = () => {
       return;
     }
 
-    alert(`Work submitted for "${selectedTask.title}":\n\nProgress: ${taskProgress}%\n\n${workDone}`);
-    setIsPerformingTask(false);
-    setSelectedTask(null);
-    setWorkDone('');
+    try {
+      // Update task with new progress
+      await apiService.updateTask(selectedTask.id, {
+        status: taskProgress === 100 ? 'completed' : 'in-progress',
+        completionPercentage: taskProgress,
+      });
+
+      // Update local state
+      setRecentTasks(recentTasks.map(t =>
+        t.id === selectedTask.id
+          ? { ...t, completionPercentage: taskProgress, status: taskProgress === 100 ? 'completed' : 'in-progress' }
+          : t
+      ));
+
+      // Refresh stats
+      fetchData();
+
+      alert(`Work submitted successfully for "${selectedTask.title}"!`);
+      setIsPerformingTask(false);
+      setSelectedTask(null);
+      setWorkDone('');
+      setTaskProgress(0);
+    } catch (error) {
+      console.error('Failed to submit work:', error);
+      alert('Failed to submit work. Please try again.');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <div className="w-full min-h-screen bg-slate-50">
       {loading ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your dashboard...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p className="text-slate-600">Loading your dashboard...</p>
           </div>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-4xl font-bold text-slate-900">
               Welcome back, {user?.name}! 👋
             </h1>
             <p className="text-gray-600 mt-2">

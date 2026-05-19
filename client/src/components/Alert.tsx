@@ -15,16 +15,16 @@ export const Alert: React.FC<AlertProps> = ({ type, message, onClose }) => {
   };
 
   const icons = {
-    success: '✓',
-    error: '✕',
-    warning: '⚠',
-    info: 'ℹ',
+    success: 'Success',
+    error: 'Error',
+    warning: 'Warning',
+    info: 'Info',
   };
 
   return (
     <div className={`p-4 rounded-lg border ${typeClasses[type]} flex items-center justify-between`}>
       <div className="flex items-center space-x-3">
-        <span className="font-bold text-lg">{icons[type]}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide">{icons[type]}</span>
         <span>{message}</span>
       </div>
       {onClose && (

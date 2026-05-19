@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import LoadingSplash from '../components/LoadingSplash';
 import { useAuthStore } from '../store/authStore';
 
 export const LoginPage: React.FC = () => {
@@ -7,6 +8,7 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [showSplash, setShowSplash] = React.useState(false);
 
   const { login } = useAuthStore();
   const navigate = useNavigate();
@@ -18,9 +20,42 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-      navigate('/dashboard');
+      // show splash for 1s then go to dashboard
+      setShowSplash(true);
+      setTimeout(() => {
+        setShowSplash(false);
+        navigate('/dashboard');
+      }, 1000);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (username: string) => {
+    setError('');
+    setIsLoading(true);
+    // Map demo buttons to server-seeded demo users
+    const mapping: { [key: string]: { email: string; password: string } } = {
+      pldemo: { email: 'mayank@orbit.com', password: 'Password@123456' },
+      qldemo: { email: 'shivam@orbit.com', password: 'Password@123456' },
+      takserdemo: { email: 'ribhav@orbit.com', password: 'Password@123456' },
+    };
+
+    const creds = mapping[username] || { email: `${username}@example.com`, password: 'password' };
+    const demoEmail = creds.email;
+    const demoPassword = creds.password;
+
+    try {
+      await login(demoEmail, demoPassword);
+      setShowSplash(true);
+      setTimeout(() => {
+        setShowSplash(false);
+        navigate('/dashboard');
+      }, 1000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Demo login failed.');
     } finally {
       setIsLoading(false);
     }
@@ -124,6 +159,34 @@ export const LoginPage: React.FC = () => {
             <div className="flex-1 h-px bg-purple-300 bg-opacity-20"></div>
           </div>
 
+          {/* Demo Logins */}
+          <div className="mb-6 text-center">
+            <p className="text-sm text-purple-200 mb-3">Quick demo logins</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => handleDemoLogin('pldemo')}
+                disabled={isLoading}
+                className="px-3 py-2 bg-white bg-opacity-10 text-white rounded-md hover:bg-white hover:text-gray-900 transition"
+              >
+                PL (pldemo)
+              </button>
+              <button
+                onClick={() => handleDemoLogin('qldemo')}
+                disabled={isLoading}
+                className="px-3 py-2 bg-white bg-opacity-10 text-white rounded-md hover:bg-white hover:text-gray-900 transition"
+              >
+                QL (qldemo)
+              </button>
+              <button
+                onClick={() => handleDemoLogin('takserdemo')}
+                disabled={isLoading}
+                className="px-3 py-2 bg-white bg-opacity-10 text-white rounded-md hover:bg-white hover:text-gray-900 transition"
+              >
+                Tasker (takserdemo)
+              </button>
+            </div>
+          </div>
+
           {/* Sign Up Link */}
           <p className="text-center text-purple-200 text-sm">
             Don't have an account?{' '}
@@ -138,6 +201,7 @@ export const LoginPage: React.FC = () => {
           <p>© 2024 Orbit. Professional Task Management Platform.</p>
         </div>
       </div>
+      {showSplash && <LoadingSplash message={isLoading ? 'Signing in' : 'Launching'} />}
     </div>
   );
 };

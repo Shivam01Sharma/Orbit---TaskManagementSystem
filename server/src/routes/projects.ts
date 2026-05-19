@@ -28,6 +28,9 @@ router.get('/', authMiddleware, (req: AuthenticatedRequest, res: Response) => {
     projects = db.getProjectsByTasker(user.id);
   }
 
+  // Only expose active projects in the projects tab
+  projects = projects.filter((project) => project.status === 'active');
+
   res.json(
     projects.map((project) => ({
       id: project.id,

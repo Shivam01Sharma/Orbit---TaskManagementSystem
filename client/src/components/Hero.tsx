@@ -16,7 +16,9 @@ export const Hero: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
           <div className="p-6 bg-white rounded-lg card-shadow">
             <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <span className="text-2xl">📊</span>
+              <svg className="w-6 h-6 text-primary-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z" fill="currentColor" />
+              </svg>
             </div>
             <h3 className="font-bold text-lg text-gray-900 mb-2">Real-time Analytics</h3>
             <p className="text-gray-600">
@@ -26,7 +28,9 @@ export const Hero: React.FC = () => {
 
           <div className="p-6 bg-white rounded-lg card-shadow">
             <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <span className="text-2xl">👥</span>
+              <svg className="w-6 h-6 text-secondary-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" fill="currentColor" />
+              </svg>
             </div>
             <h3 className="font-bold text-lg text-gray-900 mb-2">Team Management</h3>
             <p className="text-gray-600">
@@ -36,7 +40,9 @@ export const Hero: React.FC = () => {
 
           <div className="p-6 bg-white rounded-lg card-shadow">
             <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <span className="text-2xl">🎯</span>
+              <svg className="w-6 h-6 text-accent-700" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2l3 6 6 .5-4.5 3.5L18 20l-6-3-6 3 .5-7-4.5-3.5L9 8l3-6z" fill="currentColor" />
+              </svg>
             </div>
             <h3 className="font-bold text-lg text-gray-900 mb-2">Task Tracking</h3>
             <p className="text-gray-600">

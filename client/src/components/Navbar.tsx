@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import AnimatedLogo from './AnimatedLogo';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuthStore();
@@ -18,79 +19,16 @@ export const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">O</span>
-            </div>
-            <span className="text-xl font-bold text-primary-600">Orbit</span>
+            <AnimatedLogo size={36} />
           </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-6">
+          {/* Desktop: show only user info (navigation is in sidebar) */}
+          <div className="hidden md:flex items-center space-x-4">
             {user && (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="text-gray-700 hover:text-primary-600 transition text-sm"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/leaderboard"
-                  className="text-gray-700 hover:text-primary-600 transition text-sm"
-                >
-                  • Leaderboard
-                </Link>
-                <Link
-                  to="/chat"
-                  className="text-gray-700 hover:text-primary-600 transition text-sm"
-                >
-                  • Chat
-                </Link>
-                <Link
-                  to="/analytics"
-                  className="text-gray-700 hover:text-primary-600 transition text-sm"
-                >
-                  • Analytics
-                </Link>
-                <Link
-                  to="/review"
-                  className="text-gray-700 hover:text-primary-600 transition text-sm"
-                >
-                  • Review
-                </Link>
-                <Link
-                  to="/badges"
-                  className="text-gray-700 hover:text-primary-600 transition text-sm"
-                >
-                  • Badges
-                </Link>
-                <Link
-                  to="/timeline"
-                  className="text-gray-700 hover:text-primary-600 transition text-sm"
-                >
-                  • Timeline
-                </Link>
-                <Link
-                  to="/assignment"
-                  className="text-gray-700 hover:text-primary-600 transition text-sm"
-                >
-                  • Assignment
-                </Link>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-secondary-400 to-accent-400 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-700">
-                      {user.name}
-                    </span>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-secondary-400 to-accent-400 rounded-full"></div>
+                <span className="text-sm font-medium text-gray-700">{user.name}</span>
+              </div>
             )}
           </div>
 
@@ -153,29 +91,12 @@ export const Navbar: React.FC = () => {
               • Review
             </Link>
             <Link
-              to="/badges"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-            >
-              • Badges
-            </Link>
-            <Link
-              to="/timeline"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-            >
-              • Timeline
-            </Link>
-            <Link
               to="/assignment"
               className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
             >
               • Assignment
             </Link>
-            <button
-              onClick={handleLogout}
-              className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
-            >
-              Logout
-            </button>
+            {/* Logout moved to sidebar only; top menu does not include logout */}
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navbar } from '../components/Navbar';
+// Page rendered within DashboardLayout; no top Navbar here.
 
 interface Tasker {
   id: string;
@@ -26,7 +26,7 @@ const taskers: Tasker[] = [
     consistency: 97,
     overallRating: 96.5,
     badge: 'Gold',
-    avatar: '👨‍💼',
+    avatar: '',
     level: 'Elite',
   },
   {
@@ -39,7 +39,7 @@ const taskers: Tasker[] = [
     consistency: 95,
     overallRating: 94.4,
     badge: 'Silver',
-    avatar: '👩‍💼',
+    avatar: '',
     level: 'Expert',
   },
   {
@@ -52,7 +52,7 @@ const taskers: Tasker[] = [
     consistency: 93,
     overallRating: 92.7,
     badge: 'Bronze',
-    avatar: '👨‍💻',
+    avatar: '',
     level: 'Senior',
   },
   {
@@ -65,7 +65,7 @@ const taskers: Tasker[] = [
     consistency: 91,
     overallRating: 90.8,
     badge: 'None',
-    avatar: '👨‍🎓',
+    avatar: '',
     level: 'Junior',
   },
   {
@@ -78,44 +78,58 @@ const taskers: Tasker[] = [
     consistency: 89,
     overallRating: 89.3,
     badge: 'None',
-    avatar: '👨‍💼',
+    avatar: '',
     level: 'Intern',
   },
 ];
 
 export const LeaderboardPage: React.FC = () => {
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  };
+
+  const renderBadge = (badge: Tasker['badge']) => {
+    if (badge === 'Gold') return <span className="px-3 py-1 rounded-full bg-yellow-400 text-sm font-semibold text-black">Gold</span>;
+    if (badge === 'Silver') return <span className="px-3 py-1 rounded-full bg-gray-300 text-sm font-semibold text-black">Silver</span>;
+    if (badge === 'Bronze') return <span className="px-3 py-1 rounded-full bg-amber-600 text-sm font-semibold text-black">Bronze</span>;
+    return <span className="text-purple-200">—</span>;
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-      <Navbar />
+    <div className="w-full">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">Performance Leaderboard</h1>
-          <p className="text-purple-200 text-lg">Top Performers - Accuracy, Speed & Consistency</p>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Performance Leaderboard</h1>
+          <p className="text-slate-600">Top Performers - Accuracy, Speed & Consistency</p>
         </div>
 
         {/* Leaderboard Table */}
-        <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl overflow-hidden shadow-2xl border border-white border-opacity-20">
+        <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-to-r from-purple-600 to-blue-600 border-b border-white border-opacity-20">
-                  <th className="px-6 py-4 text-left text-white font-semibold">Rank</th>
-                  <th className="px-6 py-4 text-left text-white font-semibold">Tasker</th>
-                  <th className="px-6 py-4 text-center text-white font-semibold">Tasks</th>
-                  <th className="px-6 py-4 text-center text-white font-semibold">Accuracy</th>
-                  <th className="px-6 py-4 text-center text-white font-semibold">Speed</th>
-                  <th className="px-6 py-4 text-center text-white font-semibold">Consistency</th>
-                  <th className="px-6 py-4 text-center text-white font-semibold">Overall</th>
-                  <th className="px-6 py-4 text-center text-white font-semibold">Badge</th>
+                <tr className="bg-slate-50 border-b border-gray-100">
+                  <th className="px-6 py-4 text-left text-slate-700 font-semibold">Rank</th>
+                  <th className="px-6 py-4 text-left text-slate-700 font-semibold">Tasker</th>
+                  <th className="px-6 py-4 text-center text-slate-700 font-semibold">Tasks</th>
+                  <th className="px-6 py-4 text-center text-slate-700 font-semibold">Accuracy</th>
+                  <th className="px-6 py-4 text-center text-slate-700 font-semibold">Speed</th>
+                  <th className="px-6 py-4 text-center text-slate-700 font-semibold">Consistency</th>
+                  <th className="px-6 py-4 text-center text-slate-700 font-semibold">Overall</th>
+                  <th className="px-6 py-4 text-center text-slate-700 font-semibold">Badge</th>
                 </tr>
               </thead>
               <tbody>
                 {taskers.map((tasker, index) => (
                   <tr
                     key={tasker.id}
-                    className={`border-b border-white border-opacity-10 transition-all duration-300 hover:bg-white hover:bg-opacity-5 ${
-                      index % 2 === 0 ? 'bg-white bg-opacity-5' : 'bg-transparent'
+                    className={`border-b border-gray-100 transition-all duration-300 hover:bg-gray-50 ${
+                      index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
                     }`}
                   >
                     <td className="px-6 py-4">
@@ -123,40 +137,42 @@ export const LeaderboardPage: React.FC = () => {
                         <span className="text-2xl">
                           {tasker.rank === 1 ? '🥇' : tasker.rank === 2 ? '🥈' : tasker.rank === 3 ? '🥉' : ''}
                         </span>
-                        <span className="text-white font-bold text-lg">#{tasker.rank}</span>
+                        <span className="text-slate-900 font-bold text-lg">#{tasker.rank}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <span className="text-3xl">{tasker.avatar}</span>
+                        <div className="w-10 h-10 rounded-full bg-slate-700 text-white flex items-center justify-center font-semibold">
+                          {getInitials(tasker.name)}
+                        </div>
                         <div>
-                          <p className="text-white font-semibold">{tasker.name}</p>
-                          <p className="text-purple-300 text-sm">{tasker.level}</p>
+                          <p className="text-slate-900 font-semibold">{tasker.name}</p>
+                          <p className="text-slate-500 text-sm">{tasker.level}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center text-purple-200 font-semibold">{tasker.tasksCompleted}</td>
+                    <td className="px-6 py-4 text-center text-slate-700 font-semibold">{tasker.tasksCompleted}</td>
                     <td className="px-6 py-4 text-center">
-                      <div className="inline-block bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full font-bold">
+                      <div className="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">
                         {tasker.accuracy}%
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <div className="inline-block bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-3 py-1 rounded-full font-bold">
+                      <div className="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-bold">
                         {tasker.speed}%
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <div className="inline-block bg-gradient-to-r from-pink-500 to-rose-500 text-white px-3 py-1 rounded-full font-bold">
+                      <div className="inline-block bg-pink-100 text-pink-700 px-3 py-1 rounded-full font-bold">
                         {tasker.consistency}%
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <div className="inline-block bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full font-bold text-lg">
+                      <div className="inline-block bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-bold text-lg">
                         {tasker.overallRating}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center text-2xl">{tasker.badge === 'Gold' ? '🏅' : tasker.badge === 'Silver' ? '⭐' : tasker.badge === 'Bronze' ? '🎖️' : '⭕'}</td>
+                    <td className="px-6 py-4 text-center">{renderBadge(tasker.badge)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -165,29 +181,29 @@ export const LeaderboardPage: React.FC = () => {
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12">
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition">
-            <h3 className="text-purple-200 text-sm font-semibold mb-2">Top Accuracy</h3>
-            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text">98.5%</p>
-            <p className="text-purple-300 text-sm mt-2">Ribhav Kumar</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <h3 className="text-slate-500 text-sm font-semibold mb-2">Top Accuracy</h3>
+            <p className="text-2xl font-bold text-slate-900">98.5%</p>
+            <p className="text-slate-500 text-sm mt-2">Ribhav Kumar</p>
           </div>
 
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition">
-            <h3 className="text-purple-200 text-sm font-semibold mb-2">Fastest Turnaround</h3>
-            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text">94%</p>
-            <p className="text-purple-300 text-sm mt-2">Ribhav Kumar</p>
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <h3 className="text-slate-500 text-sm font-semibold mb-2">Fastest Turnaround</h3>
+            <p className="text-2xl font-bold text-slate-900">94%</p>
+            <p className="text-slate-500 text-sm mt-2">Ribhav Kumar</p>
           </div>
 
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition">
-            <h3 className="text-purple-200 text-sm font-semibold mb-2">Most Consistent</h3>
-            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text">97%</p>
-            <p className="text-purple-300 text-sm mt-2">Ribhav Kumar</p>
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <h3 className="text-slate-500 text-sm font-semibold mb-2">Most Consistent</h3>
+            <p className="text-2xl font-bold text-slate-900">97%</p>
+            <p className="text-slate-500 text-sm mt-2">Ribhav Kumar</p>
           </div>
 
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20 hover:border-opacity-40 transition">
-            <h3 className="text-purple-200 text-sm font-semibold mb-2">Tasks Completed</h3>
-            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text">156</p>
-            <p className="text-purple-300 text-sm mt-2">Ribhav Kumar</p>
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            <h3 className="text-slate-500 text-sm font-semibold mb-2">Tasks Completed</h3>
+            <p className="text-2xl font-bold text-slate-900">156</p>
+            <p className="text-slate-500 text-sm mt-2">Ribhav Kumar</p>
           </div>
         </div>
       </div>
