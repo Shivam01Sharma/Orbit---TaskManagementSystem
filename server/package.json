@@ -20,11 +20,10 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^5.9.2",
     "orbit-task-management": "file:..",
     "tsx": "^3.13.0",
     "typescript": "^5.2.2",
     "uuid": "^9.0.0"
-    ,
-    "mongodb": "^5.8.0"
   }
 }
