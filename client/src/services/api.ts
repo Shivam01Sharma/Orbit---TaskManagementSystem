@@ -5,8 +5,13 @@ class ApiService {
   private static instance: ApiService;
 
   private constructor() {
+    // Use environment variable or relative path for API base URL
+    // In production on Railway: uses relative /api (same origin)
+    // In development: uses /api with vite proxy to localhost:5000
+    const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+    
     this.api = axios.create({
-      baseURL: 'http://localhost:5000/api',
+      baseURL,
       headers: {
         'Content-Type': 'application/json',
       },
