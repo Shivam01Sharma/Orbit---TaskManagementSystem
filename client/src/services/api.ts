@@ -6,7 +6,7 @@ class ApiService {
 
   private constructor() {
     // Hardcoded backend URL (deployed) — change if your backend host is different
-    const baseURL = 'https://orbit-task-management-system.vercel.app/api';
+    const baseURL = 'https://orbit-taskmanagementsystem-1.onrender.com/api';
     
     this.api = axios.create({
       baseURL,
